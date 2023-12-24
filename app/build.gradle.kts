@@ -68,4 +68,6 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-test-manifest")
     //viewModel
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2")
+    //lifecycle aware state
+    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.6.2")
 }

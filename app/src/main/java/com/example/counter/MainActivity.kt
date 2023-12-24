@@ -14,7 +14,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -23,6 +22,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.counter.ui.theme.CounterTheme
 
@@ -46,7 +46,7 @@ class MainActivity : ComponentActivity() {
 fun MyApp(
     counterViewModel: CounterViewModel = viewModel()
 ) {
-    val counterUiState by counterViewModel.uiState.collectAsState()
+    val counterUiState by counterViewModel.uiState.collectAsStateWithLifecycle()
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
