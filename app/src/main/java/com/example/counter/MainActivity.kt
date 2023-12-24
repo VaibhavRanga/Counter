@@ -1,19 +1,13 @@
 package com.example.counter
 
-import android.app.Activity
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.spring
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -25,8 +19,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.counter.ui.theme.CounterTheme
 
@@ -50,105 +46,58 @@ class MainActivity : ComponentActivity() {
 fun MyApp(
     counterViewModel: CounterViewModel = viewModel()
 ) {
-    val counterState by counterViewModel.uiState.collectAsState()
+    val counterUiState by counterViewModel.uiState.collectAsState()
 
     Column(
-        verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.SpaceEvenly,
         modifier = Modifier
-            .animateContentSize(
-                animationSpec = spring(
-                    dampingRatio = Spring.DampingRatioHighBouncy,
-                    stiffness = Spring.StiffnessVeryLow
-                )
+            .fillMaxSize()
+    ) {
+        CountBlock(count = counterUiState.count)
+        TargetBlock(target = counterUiState.target)
+        Button(onClick = { counterViewModel.addCount() }) {
+            Text(text = "Add")
+        }
+        Button(onClick = { counterViewModel.minusCount() }) {
+            Text(text = "Minus")
+        }
+        TextField(
+            value = counterUiState.target.toString(),
+            onValueChange = { counterViewModel.updateTargetValue(it) },
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Number,
+                imeAction = ImeAction.Done
             )
-    ) {
-        TextOutputs(currentCount = counterState.currentCount, target = counterState.target)
-        AddSubtractCount(
-            addCount = {
-                counterViewModel.addCount()
-                counterViewModel.targetReached()
-            },
-            minusCount = {
-                if (counterState.currentCount != 0)
-                    counterViewModel.minusCount()
-                counterViewModel.targetReached()
-            }
         )
-        TextInputField(
-            targetField = counterViewModel.targetInputValue.toString(),
-            onTargetValueChange = { counterViewModel.enteredTargetValue(it) })
-        Button(onClick = { counterViewModel.setTarget() }) {
-            Text(text = "SET TARGET")
-        }
-        if (counterState.targetReached) {
-            DisplayToast(message = "Target reached!")
-        }
+        if (counterUiState.targetReached)
+            ToastMessage(message = stringResource(R.string.target_reached_toast))
     }
 }
 
 @Composable
-fun TextOutputs(
-    currentCount: Int,
-    target: Int,
-    modifier: Modifier = Modifier
+fun CountBlock(
+    count: Int
 ) {
-    Column(
-        modifier = modifier
-    ) {
-        Text(text = "$currentCount")
-        Spacer(modifier = Modifier.height(20.dp))
-        Text(text = "$target")
-    }
+    Text(text = stringResource(R.string.count, count))
 }
 
 @Composable
-fun AddSubtractCount(
-    addCount: () -> Unit,
-    minusCount: () -> Unit,
-    modifier: Modifier = Modifier
+fun TargetBlock(
+    target: Int
 ) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = modifier.padding(top = 20.dp)
-    ) {
-        Button(onClick = addCount) {
-            Text(text = "ADD COUNT")
-        }
-        Spacer(modifier = Modifier.height(20.dp))
-        Button(onClick = minusCount) {
-            Text(text = "MINUS COUNT")
-        }
-    }
+    Text(text = stringResource(R.string.target, target))
 }
 
 @Composable
-fun TextInputField(
-    targetField: String,
-    onTargetValueChange: (String) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    TextField(
-        value = targetField,
-        onValueChange = onTargetValueChange,
-        label = { Text(text = "Enter target...") },
-        maxLines = 1,
-        modifier = modifier.padding(vertical = 20.dp)
-    )
-}
-
-@Composable
-fun DisplayToast(
-    message: String
-) {
-    val context = (LocalContext.current as Activity)
-
+fun ToastMessage(message: String) {
+    val context = LocalContext.current
     Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
 }
 
 @Preview(showSystemUi = true)
 @Composable
-fun CounterAppPreview() {
+private fun Preview() {
     CounterTheme {
         MyApp()
     }
